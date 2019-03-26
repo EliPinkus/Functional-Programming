@@ -102,7 +102,14 @@ let compare b1 b2 =
 	let d2 = (CharMap.bindings b2.pieces) in
 	let s1 = LocSetSet.of_list (List.map snd d1) in
 	let s2 = LocSetSet.of_list(List.map snd d2) in
-	LocSetSet.compare s1 s2
+	match LocSet.compare b1.unoccupied b2.unoccupied with
+	| 1 -> 1
+	| -1 -> -1
+	| 0 -> LocSetSet.compare s1 s2
+	| _ -> failwith "shouldn't happen"
+(* working on seach, will submit ASAP *)
+(* Thank you! *)
+		
 
 let remove c ({ pieces = p; unoccupied = u } as b) = 
 	if CharMap.mem c p then

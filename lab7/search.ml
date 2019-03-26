@@ -31,29 +31,32 @@ module Search (S : Storage) (D : Domain) =
     let show_history hist =
       (String.concat "\n----\n\n" (List.map D.show (List.rev hist))) ^ "\n"
 
-    let search init =
-    	let storage = S.create() in
-    	let hist = [init] in
-    	S.push hist storage;
-    	let visited = DS.empty in
+    
 
-    	let rec iter s visited =
+
+    let search init =
+    	let rec help s visited =
     		if S.is_empty s then raise Not_found
     		else 
-    			let next_hist = S.pop s in
+    			let hist = S.pop s in
     			match () with
-    			| _ when DS.mem (List.hd next_hist) visited -> iter s visited
-    			| _ when D.is_solved (List.hd next_hist) -> next_hist
+    			| _ when DS.mem (List.hd hist) visited -> help s visited
+    			| _ when D.is_solved (List.hd hist) -> hist
     			| _ ->
-    				let kids = D.next (List.hd next_hist) in
-    				let rec iter' kid s' visited' =
-    					match kid with
-    					| [] -> iter s' visited'
-    					| h::t -> S.push (h::next_hist) s';
-    							iter' t s' (DS.add (List.hd next_hist) visited')
-					in
-						iter' kids s visited
-			in
-				iter storage visited
+    				let visited = DS.add (List.hd hist) visited in
+    				let kids = D.next (List.hd hist) in
+    				begin
+    					List.iter (fun x -> S.push (x::hist) s) kids;
+    					help s visited;
+    				end
+    			in
+    	let storage = S.create() in
+    	let hist = [init] in
+    	let visited = DS.empty in
+    	begin
+    		S.push hist storage;
+    		help storage visited;
+    	end
+
   end
 

@@ -291,9 +291,17 @@ let heap_sort_2 l =
 
 
 (* D.1 *)
-type 'a lazy_t = () (* TODO *)
-let make_lazy e = () (* TODO *)
-let force lz = ()(* TODO *)
+type 'a conts = Result of 'a | Expr of (unit -> 'a)
+type 'a lazy_t = 'a conts ref
+let make_lazy e = ref (Expr e)
+let force lz = 
+	match !lz with
+	| Result r -> r
+	| Expr e -> 
+				let r = e () in begin
+					lz := Result (r);
+					r
+				end
 
 (* D.2 *)
 let y = 
